@@ -4,19 +4,18 @@
 
 An innovation research tool that runs inside Claude Code. You name a human need, Claude autonomously researches it, discovers future industries, scores business opportunities, and generates product concepts — all personalized to your builder profile. Everything saves as JSON for cross-session persistence.
 
-## Setup (Required First Time)
+## Setup (One Time)
 
 ```
 /itropa:setup
 ```
 
-**You must run this before your first research session.** It does three things:
+Run this once per workspace. It:
 
-1. **Creates the workspace** — `research/` directory, `index.json`, `graph.json` (cross-need connections), `constraints.json`, and `CLAUDE.md`
-2. **Installs MCP search dependencies** — runs `npm install` in the plugin's `mcp/` directory so the full-text search server can start
-3. **Registers the MCP server** — enables `search_research`, `find_connections`, `get_timeline`, and `reindex` tools
+1. **Creates the workspace** — `research/` directory, `index.json`, `graph.json` (cross-need connections), and `CLAUDE.md`
+2. **Asks for your builder profile** — tech stack, experience, goals, preferences (saved to `constraints.json`)
 
-> **Important:** The MCP search server will fail to start until setup completes the `npm install` step. If you see MCP errors after installing the plugin, run `/itropa:setup` first. You only need to do this once per workspace.
+The MCP search server installs its own dependencies automatically — no manual setup needed.
 
 If you have an existing v1 workspace, setup will detect it and offer to migrate your data to v2 (timestamped directories, digests, graph).
 

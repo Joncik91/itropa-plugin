@@ -32,7 +32,7 @@ ITROPA is a Claude Code plugin that turns Claude into an autonomous innovation r
 ## Install
 
 ```bash
-claude plugin marketplace add <your-github>/itropa-plugin
+claude plugin marketplace add Joncik91/itropa-plugin
 claude plugin install itropa-plugin@itropa-marketplace
 ```
 

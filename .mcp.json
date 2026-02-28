@@ -1,6 +1,9 @@
 {
-  "itropa-search": {
-    "command": "node",
-    "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/bootstrap.js"]
+  "mcpServers": {
+    "itropa-search": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/bootstrap.js"],
+      "cwd": "${CLAUDE_PLUGIN_ROOT}/mcp"
+    }
   }
 }

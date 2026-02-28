@@ -1,0 +1,7 @@
+{
+  "name": "itropa",
+  "version": "1.0.0",
+  "description": "ITROPA - AI-powered innovation research platform. Explore human needs, discover future industries, extract mechanisms, and generate product concepts using Claude's analytical frameworks.",
+  "commands": "commands",
+  "skills": "skills"
+}

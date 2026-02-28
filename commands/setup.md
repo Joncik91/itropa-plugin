@@ -175,11 +175,9 @@ If user agrees, perform these steps for **each need** in the index:
    - Set `version` to `"2.0.0"`
    - Add `totalRuns`, `latestRun`, `latestTopIndustry`, `tags` to each need entry
 
-7. **Install MCP deps:** Run `npm install --prefix {PLUGIN_ROOT}/mcp/`
+7. **Update `CLAUDE.md`** with v2 template (from step 6 above).
 
-8. **Update `CLAUDE.md`** with v2 template (from step 7 above).
-
-9. Confirm:
+8. Confirm:
    ```
    Migration complete! {N} needs migrated to v2.0.
    - Data preserved in timestamped directories

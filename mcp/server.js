@@ -15,8 +15,8 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import initSqlJs from "sql.js";
-import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
+import Database from "better-sqlite3";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { z } from "zod";
 
@@ -76,7 +76,6 @@ function extractItems(filePath, need, runDate) {
   const items = [];
 
   if (fileType === "need") {
-    // Index need description, prior art, and industry tree
     items.push({
       need,
       runDate,
@@ -97,7 +96,6 @@ function extractItems(filePath, need, runDate) {
       tags: (data.tags || []).join(","),
     });
   } else if (fileType === "mechanisms" || fileType === "deep-dives" || fileType === "app-concepts" || fileType === "cross-pollinations") {
-    // These are keyed by expression ID
     if (typeof data === "object" && !Array.isArray(data)) {
       for (const [id, entry] of Object.entries(data)) {
         if (id === "_meta") continue;
@@ -123,7 +121,6 @@ function extractItems(filePath, need, runDate) {
       }
     }
   } else {
-    // Generic: index whole file as single item
     items.push({
       need,
       runDate,
@@ -142,49 +139,39 @@ function extractItems(filePath, need, runDate) {
 // Database
 // ---------------------------------------------------------------------------
 
-let SQL;
 let db;
 let researchDir;
 
-async function initDB() {
-  SQL = await initSqlJs();
-
-  // Try to load existing db from disk
+function initDB() {
   const dbPath = join(researchDir, ".search.db");
+
+  // Try to open existing db
   if (existsSync(dbPath)) {
     try {
-      const buffer = readFileSync(dbPath);
-      db = new SQL.Database(buffer);
+      db = new Database(dbPath);
+      // Verify the FTS table exists
+      db.prepare("SELECT COUNT(*) FROM research_fts").get();
       return;
     } catch {
-      // Corrupted — rebuild
+      // Corrupted or missing table — rebuild
+      try { db.close(); } catch { /* ignore */ }
     }
   }
 
-  db = new SQL.Database();
+  // Create new db
+  db = new Database(dbPath);
   createTables();
   indexAll();
-  saveToDisk();
 }
 
 function createTables() {
-  db.run(`DROP TABLE IF EXISTS research_fts;`);
-  db.run(`
+  db.exec(`DROP TABLE IF EXISTS research_fts;`);
+  db.exec(`
     CREATE VIRTUAL TABLE research_fts USING fts5(
       need, run_date, file_type, item_id, title, content, tags,
       tokenize='porter unicode61'
     );
   `);
-}
-
-function saveToDisk() {
-  try {
-    const data = db.export();
-    const buffer = Buffer.from(data);
-    writeFileSync(join(researchDir, ".search.db"), buffer);
-  } catch {
-    // Non-fatal — search still works in-memory
-  }
 }
 
 /**
@@ -194,17 +181,24 @@ function saveToDisk() {
 function indexAll() {
   if (!existsSync(researchDir)) return;
 
-  const stmt = db.prepare(
+  const insert = db.prepare(
     `INSERT INTO research_fts (need, run_date, file_type, item_id, title, content, tags)
      VALUES (?, ?, ?, ?, ?, ?, ?);`
   );
+
+  const insertMany = db.transaction((items) => {
+    for (const item of items) {
+      insert.run(item.need, item.runDate, item.fileType, item.itemId, item.title, item.content, item.tags);
+    }
+  });
+
+  const allItems = [];
 
   for (const needEntry of readdirSync(researchDir, { withFileTypes: true })) {
     if (!needEntry.isDirectory()) continue;
     const needSlug = needEntry.name;
     const needDir = join(researchDir, needSlug);
 
-    // Check for timestamped run dirs (v2) vs flat files (v1)
     for (const child of readdirSync(needDir, { withFileTypes: true })) {
       if (child.isDirectory() && /^\d{4}-\d{2}-\d{2}/.test(child.name)) {
         // v2 timestamped run directory
@@ -212,25 +206,17 @@ function indexAll() {
         const runDir = join(needDir, runDate);
         const jsonFiles = walkSync(runDir, (f) => f.endsWith(".json"));
         for (const fp of jsonFiles) {
-          for (const item of extractItems(fp, needSlug, runDate)) {
-            stmt.bind([item.need, item.runDate, item.fileType, item.itemId, item.title, item.content, item.tags]);
-            stmt.step();
-            stmt.reset();
-          }
+          allItems.push(...extractItems(fp, needSlug, runDate));
         }
       } else if (child.isFile() && child.name.endsWith(".json") && child.name !== "runs.json") {
         // v1 flat file
         const fp = join(needDir, child.name);
-        for (const item of extractItems(fp, needSlug, "legacy")) {
-          stmt.bind([item.need, item.runDate, item.fileType, item.itemId, item.title, item.content, item.tags]);
-          stmt.step();
-          stmt.reset();
-        }
+        allItems.push(...extractItems(fp, needSlug, "legacy"));
       }
     }
   }
 
-  stmt.free();
+  insertMany(allItems);
 }
 
 // ---------------------------------------------------------------------------
@@ -281,26 +267,21 @@ server.tool(
     params.push(limit);
 
     try {
-      const results = [];
-      const stmt = db.prepare(sql);
-      stmt.bind(params);
-      while (stmt.step()) {
-        const row = stmt.getAsObject();
-        results.push({
-          need: row.need,
-          runDate: row.run_date,
-          fileType: row.file_type,
-          itemId: row.item_id,
-          title: row.title,
-          snippet: row.snippet,
-          tags: row.tags ? row.tags.split(",").filter(Boolean) : [],
-        });
-      }
-      stmt.free();
+      const rows = db.prepare(sql).all(...params);
 
-      if (results.length === 0) {
+      if (rows.length === 0) {
         return { content: [{ type: "text", text: `No results found for "${query}".` }] };
       }
+
+      const results = rows.map((row) => ({
+        need: row.need,
+        runDate: row.run_date,
+        fileType: row.file_type,
+        itemId: row.item_id,
+        title: row.title,
+        snippet: row.snippet,
+        tags: row.tags ? row.tags.split(",").filter(Boolean) : [],
+      }));
 
       return {
         content: [
@@ -334,12 +315,10 @@ server.tool(
 
     let connections = graph.connections || [];
 
-    // Filter connections involving need_a
     connections = connections.filter(
       (c) => c.source?.need === need_a || c.target?.need === need_a
     );
 
-    // Further filter if need_b specified
     if (need_b) {
       connections = connections.filter(
         (c) =>
@@ -348,7 +327,6 @@ server.tool(
       );
     }
 
-    // Gather relevant themes
     const themes = {};
     if (graph.themes) {
       for (const [theme, data] of Object.entries(graph.themes)) {
@@ -388,11 +366,9 @@ server.tool(
       return { content: [{ type: "text", text: `No research found for need "${need}".` }] };
     }
 
-    // Read runs.json
     const runsPath = join(needDir, "runs.json");
     const runs = readJSON(runsPath);
 
-    // Collect digests from timestamped dirs
     const digests = [];
     for (const entry of readdirSync(needDir, { withFileTypes: true })) {
       if (entry.isDirectory() && /^\d{4}-\d{2}-\d{2}/.test(entry.name)) {
@@ -404,7 +380,6 @@ server.tool(
       }
     }
 
-    // Sort by date descending
     digests.sort((a, b) => b.runDate.localeCompare(a.runDate));
 
     const result = {
@@ -429,11 +404,9 @@ server.tool(
     try {
       createTables();
       indexAll();
-      saveToDisk();
 
-      // Count indexed items
-      const countResult = db.exec("SELECT COUNT(*) as cnt FROM research_fts;");
-      const count = countResult[0]?.values[0]?.[0] || 0;
+      const row = db.prepare("SELECT COUNT(*) as cnt FROM research_fts").get();
+      const count = row?.cnt || 0;
 
       return {
         content: [
@@ -454,13 +427,10 @@ server.tool(
 // ---------------------------------------------------------------------------
 
 async function main() {
-  // Resolve research directory from cwd
   const cwd = process.cwd();
   researchDir = join(cwd, "research");
 
-  // If research dir doesn't exist at cwd, check common locations
   if (!existsSync(researchDir)) {
-    // Check if we're inside the plugin dir — look for research in parent dirs
     const candidates = [
       join(cwd, "research"),
       join(cwd, "..", "research"),
@@ -474,7 +444,7 @@ async function main() {
     }
   }
 
-  await initDB();
+  initDB();
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

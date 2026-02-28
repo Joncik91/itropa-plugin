@@ -35,23 +35,30 @@ Initialize this directory as an ITROPA innovation research workspace.
    }
    ```
 
-5. **Create `constraints.json`** with default builder profile:
+5. **Ask the user to describe themselves** for personalized research:
+
+   Prompt: "Before we start, tell me about yourself so I can personalize the research. Describe your tech stack, experience level, available time, revenue goals, and what kind of products you prefer. For example: *I'm a senior Python/React dev, working on side projects, want $3-5k MRR, prefer SaaS and APIs.*"
+
+   Parse their response and save to `constraints.json`:
    ```json
    {
-     "techStack": ["React", "TypeScript", "Node.js"],
-     "experienceLevel": "intermediate",
+     "techStack": [],
+     "experienceLevel": "beginner|intermediate|advanced",
      "hasAIAccess": true,
-     "availableTime": "2-4 weeks",
-     "workStyle": "side-project",
-     "revenueGoal": "side-income",
-     "preferredFormFactors": ["saas", "tool", "api"],
+     "availableTime": "weekend|1-2 weeks|2-4 weeks|1-2 months|unlimited",
+     "workStyle": "side-project|full-time|exploring",
+     "revenueGoal": "learning|side-income|replace-salary|build-business",
+     "targetMRR": "$X-Xk",
+     "preferredFormFactors": [],
      "avoidCategories": [],
      "preferB2B": true,
      "preferB2C": true,
-     "riskTolerance": "medium",
+     "riskTolerance": "low|medium|high",
      "lastUpdated": "<current ISO timestamp>"
    }
    ```
+
+   If the user skips or says "default", use reasonable defaults but note that `/itropa:constraints` can update the profile anytime.
 
 6. **Create `CLAUDE.md`** with session instructions:
    ```markdown

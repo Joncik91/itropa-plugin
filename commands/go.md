@@ -8,9 +8,41 @@ Run a full ITROPA research pipeline on a human need. Claude makes all decisions 
 
 If no argument provided, ask the user what need they want to explore.
 
+## Pre-Flight
+
+1. Read `constraints.json` for builder profile. If missing, use defaults and note it.
+2. Read `research/index.json`. If missing, run setup first.
+3. Compute the need slug: lowercase, hyphens, no special chars.
+4. Compute today's date: `YYYY-MM-DD` format.
+
+### Re-Research Detection
+
+If the need already exists in `research/index.json`:
+
+1. Read `research/{slug}/runs.json` if it exists.
+2. Show the user a summary:
+   ```
+   "{Need}" has been researched before:
+     Run 1: {date} — Top industry: {name} ({score}/100, {verdict})
+     Run 2: {date} — ...
+
+   Options:
+     1. Fresh run (preserves all previous data, creates new timestamped directory)
+     2. Continue latest run (add analysis to the most recent run's data)
+   ```
+3. Proceed based on user's choice.
+
+### Same-Day Collision Handling
+
+If `research/{slug}/{date}/` already exists:
+- Append a suffix: `{date}-2`, `{date}-3`, etc.
+- Check incrementally until an unused path is found.
+
+Set `RUN_DIR = research/{slug}/{date}` (or `{date}-N` if collision).
+
 ## Pipeline
 
-Run these phases in sequence. Do NOT ask for user input between phases — make decisions autonomously. Read `constraints.json` before starting to personalize all analysis.
+Run these phases in sequence. Do NOT ask for user input between phases — make decisions autonomously.
 
 ### Phase 1: Prior Art Research
 
@@ -40,7 +72,7 @@ Generate:
 - `description`: Brief core need description
 - `relatedNeeds`: 3 related needs
 
-**Save** `research/{slug}/need.json` and update `research/index.json`.
+**Save** `{RUN_DIR}/need.json` and update `research/index.json`.
 
 ### Phase 3: Autonomous Triage
 
@@ -59,7 +91,7 @@ Take the #1 ranked industry and generate 3 specialized sub-industries as childre
 - Unique `name`, `mutation`, `insight`, `inspirations`
 - `children`: `[]`
 
-Update the parent's `children` array in `need.json`. Update index stats.
+Update the parent's `children` array in `{RUN_DIR}/need.json`. Update index stats.
 
 ### Phase 5: Mechanism Extraction (Top 3)
 
@@ -73,7 +105,7 @@ For each of the top 3 industries, run ALL 5 mechanism frameworks. Use the mechan
 
 Each framework produces: `coreMechanism`, `abstractPattern`, framework-specific fields, `historicalApplications` (2-3 real examples), `untappedDomains` (2-3), `combinationPotential`, and metadata scores.
 
-**Save** all to `research/{slug}/mechanisms.json` keyed by expression ID.
+**Save** all to `{RUN_DIR}/mechanisms.json` keyed by expression ID.
 
 ### Phase 6: Deep Dive (Top 3)
 
@@ -88,7 +120,7 @@ Produce:
 - **Monetization Models**: 2-3 models with pricing and revenue ranges
 - **Build Recommendation**: verdict (build/explore/skip), confidence, reasoning, nextStep
 
-**Save** to `research/{slug}/deep-dives.json` keyed by expression ID.
+**Save** to `{RUN_DIR}/deep-dives.json` keyed by expression ID.
 
 ### Phase 7: App Concepts (Best Scoring)
 
@@ -102,7 +134,7 @@ Rules:
 - At least one "ambitious bet" (1-2 months)
 - Scores personalized to builder profile
 
-**Save** to `research/{slug}/app-concepts.json` keyed by expression ID.
+**Save** to `{RUN_DIR}/app-concepts.json` keyed by expression ID.
 
 ### Phase 8: Cross-Pollination (Top 2)
 
@@ -116,7 +148,135 @@ Take the two highest-scoring industries from Phase 6 and cross-pollinate them us
 
 Each hybrid: `id`, `type`, `name`, `mutation`, `insight`, `combinationType`, `synergyScore`, `noveltyFactor`, `marketFit`, `challenges`, `inspirations`.
 
-**Save** to `research/{slug}/cross-pollinations.json`.
+**Save** to `{RUN_DIR}/cross-pollinations.json`.
+
+### Phase 8.5: Generate Digest
+
+After all data is saved, generate a compact `digest.json` (~1KB) in the run directory. This is what Claude reads first for fast scanning in future sessions.
+
+**Extract from the run's data:**
+```json
+{
+  "need": "{Need Name}",
+  "runDate": "{YYYY-MM-DD or YYYY-MM-DD-N}",
+  "constraintsSnapshot": {
+    "experienceLevel": "...",
+    "targetMRR": "...",
+    "techStack": ["..."],
+    "availableTime": "...",
+    "workStyle": "..."
+  },
+  "industries": [
+    {
+      "id": "...",
+      "name": "...",
+      "score": 85,
+      "verdict": "BUILD"
+    }
+  ],
+  "topMechanisms": ["trust-building", "reputation-signaling"],
+  "topConcepts": [
+    { "name": "...", "score": 80, "effort": "weekend" }
+  ],
+  "tags": ["reputation", "trust", "credibility"],
+  "keyInsights": ["Insight 1", "Insight 2", "Insight 3"]
+}
+```
+
+**How to populate each field:**
+- `constraintsSnapshot` — copy key fields from current `constraints.json`
+- `industries` — from deep-dives.json, extract id/name/overallScore/verdict for each analyzed industry
+- `topMechanisms` — from mechanisms.json, extract the most frequently mentioned abstract patterns (top 3-5)
+- `topConcepts` — from app-concepts.json, top 3 concepts by score with name/score/effortEstimate
+- `tags` — combine recurring themes from all data (aim for 5-10 tags)
+- `keyInsights` — 3-5 most important takeaways from the entire run
+
+**Save** to `{RUN_DIR}/digest.json`.
+
+### Phase 8.7: Update Graph, Runs, and Index
+
+**Step 1 — Update `runs.json`:**
+
+Read or create `research/{slug}/runs.json`:
+```json
+{
+  "need": "{Need Name}",
+  "slug": "{slug}",
+  "runs": [
+    {
+      "date": "{run date}",
+      "constraintsSnapshot": { ... },
+      "stats": {
+        "industries": 8,
+        "mechanisms": 15,
+        "deepDives": 3,
+        "appConcepts": 5,
+        "crossPollinations": 5
+      },
+      "topIndustry": {
+        "name": "...",
+        "score": 84,
+        "verdict": "BUILD"
+      },
+      "tags": ["reputation", "trust"]
+    }
+  ]
+}
+```
+Append a new entry for this run. Stats come from counting items in each saved file.
+
+**Step 2 — Update `graph.json`:**
+
+Read `research/graph.json`. If this is the first need researched, just initialize with empty connections. If other needs have been researched:
+
+1. Read digests from ALL other needs' latest runs.
+2. Compare this run's `topMechanisms` and `tags` against other needs' digests.
+3. For each shared mechanism or theme, add a connection:
+   ```json
+   {
+     "type": "shared-mechanism",
+     "source": { "need": "{this-slug}", "run": "{this-date}", "item": "{expression-id}" },
+     "target": { "need": "{other-slug}", "run": "{other-date}", "item": "{expression-id}" },
+     "mechanism": "{shared mechanism name}",
+     "strength": 0.85
+   }
+   ```
+4. Update the `themes` map: for each tag in this run's digest, add an occurrence entry.
+
+Save `research/graph.json`.
+
+**Step 3 — Update `index.json` to v2 schema:**
+
+Update the need entry in `research/index.json`:
+```json
+{
+  "need-slug": {
+    "name": "Need Name",
+    "slug": "need-slug",
+    "icon": "Users",
+    "description": "Brief description",
+    "createdAt": "ISO timestamp",
+    "lastUpdated": "ISO timestamp",
+    "totalRuns": 2,
+    "latestRun": "2026-02-28",
+    "latestTopIndustry": { "name": "...", "score": 84, "verdict": "BUILD" },
+    "tags": ["reputation", "trust"],
+    "stats": {
+      "industries": 5,
+      "mechanisms": 15,
+      "deepDives": 3,
+      "appConcepts": 5,
+      "crossPollinations": 5,
+      "chains": 0
+    }
+  }
+}
+```
+Set `index.json` version to `"2.0.0"`. Recompute `totalNeeds` and `totalIndustries`.
+
+**Step 4 — Reindex (optional):**
+
+If the MCP tool `reindex` is available, call it to rebuild the search index. If MCP is not running, skip gracefully — this is an enhancement, not a requirement.
 
 ### Phase 9: Research Report
 
@@ -125,6 +285,7 @@ Present a complete report to the user:
 ```
 ITROPA Research Report: {Need Name}
 ════════════════════════════════════
+Run: {date} | Run #{N} for this need
 
 Prior Art Highlights:
   - {Top leader}: {mechanism} (but misses: {limitation})
@@ -168,6 +329,9 @@ Best Cross-Pollination:
   {Industry A} × {Industry B} →
   - {Hybrid name} (synergy: {X}, novelty: {X}) — "{insight}"
 
+Cross-Need Connections:
+  {Show any shared mechanisms/themes found with other needs, or "First need — run more to find connections"}
+
 Key Transferable Mechanisms:
   - {abstractPattern 1} — found in {domain}, untapped in {domain}
   - {abstractPattern 2} — ...
@@ -177,10 +341,9 @@ What to do next:
   - "Explore {related need}" — Run another pipeline
   - "Cross-pollinate {X} + {Y}" — Combine specific industries
   - "What can I build this weekend?" — I'll filter for quick wins
+  - "Compare my {Need} runs" — See how research evolved
   - /itropa:status — See all your research
 ```
-
-Update all index.json stats after completion.
 
 ## Quality Standards
 
@@ -192,9 +355,13 @@ Update all index.json stats after completion.
 - Scores use the full 0-100 range meaningfully
 - Build verdicts are honest — not everything is "build"
 - The report should be actionable — the user should know what to do next
+- Digest should be compact (~1KB) — just enough for fast scanning
 
 ## Error Handling
 
 - If `constraints.json` doesn't exist, use defaults and note it
 - If `research/index.json` doesn't exist, run setup first
-- If the need already exists, inform user and ask: re-research or run analysis on existing data?
+- If the need already exists, show run history and offer fresh run or continue latest
+- If same-day directory collision, append suffix (`-2`, `-3`, etc.)
+- If MCP reindex fails or MCP not available, skip gracefully
+- If `graph.json` doesn't exist, create it with empty connections

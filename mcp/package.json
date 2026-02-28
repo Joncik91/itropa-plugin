@@ -1,0 +1,12 @@
+{
+  "name": "itropa-search",
+  "version": "2.0.0",
+  "description": "MCP search server for ITROPA research data — SQLite FTS5 full-text search",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "sql.js": "^1.12.0",
+    "zod": "^3.24.0"
+  }
+}

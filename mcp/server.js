@@ -143,6 +143,14 @@ let db;
 let researchDir;
 
 function initDB() {
+  // If research dir doesn't exist yet, use in-memory DB — server stays alive
+  // and will work once /itropa:setup creates the directory
+  if (!existsSync(researchDir)) {
+    db = new Database(":memory:");
+    createTables();
+    return;
+  }
+
   const dbPath = join(researchDir, ".search.db");
 
   // Try to open existing db
@@ -158,7 +166,7 @@ function initDB() {
     }
   }
 
-  // Create new db
+  // Create new db on disk
   db = new Database(dbPath);
   createTables();
   indexAll();

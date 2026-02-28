@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.1.0] - 2026-02-28
+
+### Fixed
+- **MCP server FTS5 crash**: switched from `sql.js` (WASM build lacks FTS5) to `better-sqlite3` (native, FTS5 built in)
+- **MCP deps not installed after plugin install**: added `bootstrap.js` that auto-installs `node_modules` on first server start — no manual `npm install` needed
+- **Internal skills visible to users**: added `user-invocable: false` frontmatter to all 7 skills — users now only see the 4 commands
+- **Constraints auto-populated with defaults**: setup now asks the user to describe themselves instead of silently writing a generic profile
+- **Stale command references**: removed `/itropa:mechanisms`, `/itropa:deep-dive`, etc. from skill docs (these were never real commands)
+- **Dead `statSync` import** in server.js
+- **Hardcoded workspace name** in SKILL.md replaced with `{workspace}/`
+
+### Changed
+- MCP server uses `better-sqlite3` instead of `sql.js` for reliable FTS5 support
+- MCP `.mcp.json` points to `bootstrap.js` (auto-installs deps) instead of `server.js` directly
+- `docs/user-guide.md` fully rewritten for v2 (timestamped runs, digest/graph phases, new conversational commands)
+- README clarifies that `/itropa:setup` is required before MCP search works
+
 ## [2.0.0] - 2026-02-28
 
 ### Added
@@ -26,7 +43,7 @@
 - `CLAUDE.md` template updated with v2 data structure and MCP tool documentation
 
 ### Technical
-- MCP server uses `sql.js` (pure JS SQLite) for Windows compatibility — no native build deps
+- MCP server uses `better-sqlite3` with FTS5 — bootstraps its own dependencies on first start
 - MCP is enhancement, not dependency — all features work without MCP server running
 - Research graph updated by Claude during pipeline, not by MCP server
 

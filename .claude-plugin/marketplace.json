@@ -1,7 +1,7 @@
 {
   "name": "itropa-marketplace",
   "metadata": {
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "ITROPA — AI-powered innovation research platform. Explore needs, discover industries, extract mechanisms."
   },
   "owner": {
@@ -11,7 +11,7 @@
     {
       "name": "itropa-plugin",
       "description": "Innovation research with 5-framework analysis: mechanisms, patterns, prior art, chains, and cross-pollination.",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "source": "./"
     }
   ]

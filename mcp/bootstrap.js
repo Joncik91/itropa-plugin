@@ -3,7 +3,7 @@
 /**
  * ITROPA MCP Bootstrap
  *
- * Auto-installs dependencies if missing, then starts the MCP server.
+ * Auto-installs dependencies if missing or outdated, then starts the MCP server.
  * This solves the chicken-and-egg problem: the MCP server needs
  * node_modules but there's no postinstall hook in the plugin system.
  */
@@ -14,9 +14,9 @@ import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const nodeModules = join(__dirname, "node_modules");
+const betterSqlite = join(__dirname, "node_modules", "better-sqlite3");
 
-if (!existsSync(nodeModules)) {
+if (!existsSync(betterSqlite)) {
   try {
     process.stderr.write("ITROPA: Installing MCP server dependencies...\n");
     execSync("npm install --production", { cwd: __dirname, stdio: "pipe" });

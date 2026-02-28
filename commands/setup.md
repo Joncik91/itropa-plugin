@@ -53,12 +53,7 @@ Initialize this directory as an ITROPA innovation research workspace.
    }
    ```
 
-6. **Install MCP server dependencies:**
-   Run `npm install --prefix {PLUGIN_ROOT}/mcp/` where `{PLUGIN_ROOT}` is the ITROPA plugin's installation directory. This installs the MCP search server's dependencies (`@modelcontextprotocol/sdk` and `sql.js`).
-
-   If this fails (e.g., npm not available), note it and continue — the MCP search server is an enhancement, not a requirement.
-
-7. **Create `CLAUDE.md`** with session instructions:
+6. **Create `CLAUDE.md`** with session instructions:
    ```markdown
    # ITROPA Research Workspace (v2.0)
 
@@ -116,7 +111,7 @@ Initialize this directory as an ITROPA innovation research workspace.
    If MCP tools are not available, fall back to reading files directly.
    ```
 
-8. **Confirm setup:**
+7. **Confirm setup:**
    ```
    ITROPA workspace ready! (v2.0)
 

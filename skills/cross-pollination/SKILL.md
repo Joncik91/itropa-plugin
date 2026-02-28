@@ -1,3 +1,7 @@
+---
+user-invocable: false
+---
+
 # Cross-Pollination — 5 Combination Strategies
 
 This skill provides the analytical frameworks for combining two industries into novel hybrid innovations. Used by Phase 8 of `/itropa:go`, or conversationally when the user says "cross-pollinate X and Y".

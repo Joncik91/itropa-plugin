@@ -1,3 +1,7 @@
+---
+user-invocable: false
+---
+
 # Prior Art Analysis — 5 Frameworks
 
 This skill provides the analytical frameworks for deep strategic analysis of a need's prior art. Used conversationally when the user asks to analyze prior art for a need.

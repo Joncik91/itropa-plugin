@@ -1,3 +1,7 @@
+---
+user-invocable: false
+---
+
 # ITROPA Workspace Awareness
 
 This skill activates when working in an ITROPA research workspace. It provides data structure knowledge, session continuity, and conversational research capabilities.

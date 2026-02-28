@@ -60,9 +60,10 @@ Then just talk:
 "Explore Safety next"
 "Compare my Status runs"
 "What connects Status and Belonging?"
+/itropa:status
 ```
 
-4 commands total. Everything else is conversation.
+4 commands total (`setup`, `go`, `status`, `constraints`). Everything else is conversation.
 
 ## What Makes This Different
 

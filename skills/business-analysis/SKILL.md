@@ -1,6 +1,6 @@
 # Business Analysis — Deep Dive + App Concepts
 
-This skill provides the analytical frameworks for business analysis, opportunity scoring, and product concept generation. Use when `/itropa:deep-dive` or `/itropa:app-concepts` commands are invoked.
+This skill provides the analytical frameworks for business analysis, opportunity scoring, and product concept generation. Used by Phase 6 (Deep Dive) and Phase 7 (App Concepts) of `/itropa:go`, or conversationally when the user asks for business analysis or product concepts.
 
 ## Trigger
 

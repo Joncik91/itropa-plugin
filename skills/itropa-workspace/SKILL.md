@@ -61,7 +61,7 @@ All analysis capabilities from the 7 skills are available conversationally. The 
 ## Workspace Data Structure (v2.0 — Timestamped Runs)
 
 ```
-claudes-itropa/
+{workspace}/
 ├── CLAUDE.md                      # Session instructions
 ├── constraints.json               # Builder profile
 └── research/

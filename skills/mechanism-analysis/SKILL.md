@@ -1,6 +1,6 @@
 # Mechanism Analysis — 5 Frameworks
 
-This skill provides the analytical frameworks for extracting transferable mechanisms from future industries. Use these frameworks when the `/itropa:mechanisms` command is invoked.
+This skill provides the analytical frameworks for extracting transferable mechanisms from future industries. Used by Phase 5 of `/itropa:go`, or conversationally when the user asks to extract mechanisms from an industry.
 
 ## Trigger
 

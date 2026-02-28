@@ -1,6 +1,6 @@
 # Pattern Analysis — 5 Frameworks
 
-This skill provides the analytical frameworks for analyzing patterns that appear across multiple needs and industries. Use when `/itropa:patterns` is invoked.
+This skill provides the analytical frameworks for analyzing patterns that appear across multiple needs and industries. Used conversationally when the user asks to find patterns across research.
 
 ## Trigger
 

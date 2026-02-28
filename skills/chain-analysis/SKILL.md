@@ -1,6 +1,6 @@
 # Chain Analysis — 5 Frameworks
 
-This skill provides the analytical frameworks for analyzing the inspiration chains behind innovations. Use when `/itropa:chains` is invoked.
+This skill provides the analytical frameworks for analyzing the inspiration chains behind innovations. Used conversationally when the user asks to trace inspiration chains.
 
 ## Trigger
 

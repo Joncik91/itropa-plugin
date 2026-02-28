@@ -46,10 +46,12 @@ claude
 ```
 
 ```
-/itropa:setup              # One time — sets up workspace + MCP search
+/itropa:setup              # Required first time — workspace + MCP search deps
 /itropa:constraints        # "I'm a senior dev, side project, want $5k MRR"
 /itropa:go Belonging       # Full autonomous pipeline
 ```
+
+> **Note:** `/itropa:setup` must run before your first research session. It creates the workspace structure and installs the MCP search server dependencies (`npm install`). The MCP server won't start until this step completes. You only need to do this once per workspace.
 
 Then just talk:
 

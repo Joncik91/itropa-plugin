@@ -83,34 +83,52 @@ Each agent uses a two-pass approach: training knowledge first, then web search t
 Wait for all 3 agents to complete, then merge their outputs into a unified intelligence brief.
 
 **Merge rules:**
-- **Web-verified trumps training knowledge**: If the knowledge agent names a company and the market agent found real data for it, use the real data
+- **Web-verified trumps training knowledge**: If the knowledge agent names a company and the market agent found real data for it, use the real data (keep the `sourceUrl`)
 - **Add web-only discoveries**: Companies, launches, and trends found only via web search get added to the appropriate prior art categories
 - **Preserve knowledge-only insights**: Historical precedents, biomimicry, abstract patterns, and industry landscape from the knowledge agent are kept — these don't need web verification
 - **Tag every data point** with its source: `knowledgeBased`, `webVerified`, or `webOnly`
+- **Preserve `sourceUrl`** from agents — every web-verified/web-only data point should retain its citation URL
+- **Preserve `confidence`** ratings from all agents — high/medium/low
+
+**Cross-Reference Across Agents:**
+After merging, explicitly cross-reference findings between the 3 agents:
+- If the knowledge agent identified a company as a "current leader" AND the market agent found real data for it → upgrade to `webVerified`, attach the market agent's `sourceUrl`, funding, and pricing
+- If the market agent found a company the knowledge agent didn't mention → add it as `webOnly` to prior art's `currentLeaders`
+- If the trend agent found a recent launch that competes with a knowledge agent's "current leader" → note it as a competitive threat in that leader's `limitation` field
+- If the trend agent's `technologyEnablers` align with the knowledge agent's `techEnablers` in industry landscape → flag these as high-confidence enablers
+- If the trend agent found solo dev opportunities that match the builder's tech stack → flag these for priority in Phase 3 triage
+- Look for **contradictions** between agents — if knowledge says a company is a leader but market search can't find it, downgrade confidence to `low`
 
 **Build `intelligence.json`:**
 ```json
 {
   "priorArt": {
-    "currentLeaders": [...],
+    "currentLeaders": [{ "name": "...", "source": "...", "sourceUrl": "...", "confidence": "..." }],
     "historical": [...],
     "adjacent": [...],
     "nature": [...]
   },
   "marketData": {
-    "companies": [{ "name": "...", "url": "...", "funding": "...", "pricing": "...", "limitation": "...", "source": "webVerified" }],
-    "marketSize": "...",
+    "companies": [{ "name": "...", "url": "...", "funding": "...", "pricing": "...", "limitation": "...", "source": "...", "sourceUrl": "...", "confidence": "..." }],
+    "marketSize": { "estimate": "...", "sourceUrl": "...", "confidence": "..." },
     "segments": [...],
-    "pricingLandscape": { "freeOptions": [], "lowEnd": "", "midRange": "", "enterprise": "", "commonModels": [] },
-    "recentFunding": [...]
+    "pricingLandscape": { "freeOptions": [], "lowEnd": "", "midRange": "", "enterprise": "", "commonModels": [], "confidence": "..." },
+    "recentFunding": [{ "company": "...", "amount": "...", "sourceUrl": "...", "confidence": "..." }]
   },
   "trends": {
-    "hotNow": [...],
+    "hotNow": [{ "trend": "...", "source": "...", "sourceUrl": "...", "confidence": "..." }],
     "emerging": [...],
     "technologyEnablers": [...],
     "soloDevOpportunities": [...]
   },
   "patterns": [...],
+  "crossReferences": [
+    {
+      "finding": "Description of cross-agent insight",
+      "agents": ["knowledge", "market"],
+      "implication": "What this means for the pipeline"
+    }
+  ],
   "dataSources": {
     "knowledgeBased": 0,
     "webVerified": 0,

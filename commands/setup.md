@@ -62,7 +62,7 @@ Initialize this directory as an ITROPA innovation research workspace.
 
 6. **Create `CLAUDE.md`** with session instructions:
    ```markdown
-   # ITROPA Research Workspace (v2.0)
+   # ITROPA Research Workspace (v2.1.1)
 
    This is an ITROPA innovation research workspace. On session start:
 
@@ -88,7 +88,7 @@ Initialize this directory as an ITROPA innovation research workspace.
    - "Compare my Status runs" — see how research evolved
    - "What connects Status and Belonging?" — cross-need connections
 
-   ## Data (v2.0 — Timestamped Runs)
+   ## Data (v2.1.1 — Timestamped Runs)
 
    Research saves as JSON in `research/`. Each research run gets its own timestamped directory, preserving all previous data.
 
@@ -99,6 +99,7 @@ Initialize this directory as an ITROPA innovation research workspace.
    └── {need-slug}/
        ├── runs.json           # Run history for this need
        └── {YYYY-MM-DD}/       # Timestamped run directory
+           ├── intelligence.json  # Web + knowledge research data
            ├── need.json
            ├── mechanisms.json
            ├── deep-dives.json
@@ -120,7 +121,7 @@ Initialize this directory as an ITROPA innovation research workspace.
 
 7. **Confirm setup:**
    ```
-   ITROPA workspace ready! (v2.0)
+   ITROPA workspace ready! (v2.1.1)
 
    1. Set your builder profile: /itropa:constraints
       (or just describe yourself: "I'm a senior Python dev, side project, want $5k MRR")

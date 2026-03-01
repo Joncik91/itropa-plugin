@@ -62,7 +62,7 @@ After a pipeline completes (or anytime with existing data), the user can just ta
 
 All analysis capabilities from the 7 skills are available conversationally. The user never needs to remember a command name — they describe what they want and Claude uses the appropriate skill.
 
-## Workspace Data Structure (v2.0 — Timestamped Runs)
+## Workspace Data Structure (v2.1.1 — Timestamped Runs)
 
 ```
 {workspace}/

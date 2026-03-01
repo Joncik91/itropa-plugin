@@ -16,7 +16,7 @@ Display a comprehensive dashboard of all ITROPA research, with optional search.
 **Display:**
 
 ```
-ITROPA Research Dashboard (v2.0)
+ITROPA Research Dashboard (v2.1.1)
 ══════════════════════════════════
 
 Builder: {experience} dev | {techStack} | {workStyle} | {revenueGoal}

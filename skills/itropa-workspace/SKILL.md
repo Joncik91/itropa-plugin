@@ -95,11 +95,11 @@ The pipeline dispatches 3 parallel research agents at the start of each run:
 
 | Agent | Model | Tools | Purpose |
 |-------|-------|-------|---------|
-| `knowledge-researcher` | sonnet | Read | Prior art, historical patterns, biomimicry, abstract mechanisms from training data |
-| `market-researcher` | sonnet | WebSearch, WebFetch | Real companies, funding, pricing, market sizing, competitive gaps |
-| `trend-researcher` | sonnet | WebSearch, WebFetch | Recent launches, YC/ProductHunt, technology shifts, timing signals |
+| `knowledge-researcher` | sonnet | Read, WebSearch, WebFetch | Prior art, historical patterns, biomimicry, abstract mechanisms — training knowledge verified and enriched via web search |
+| `market-researcher` | sonnet | WebSearch, WebFetch | Companies, funding, pricing, market sizing, competitive gaps — training knowledge combined with real web data |
+| `trend-researcher` | sonnet | WebSearch, WebFetch | Recent launches, YC/ProductHunt, technology shifts, timing signals — training knowledge combined with real web data |
 
-Their outputs merge into `intelligence.json` — a unified brief that feeds all downstream phases. Web-verified data takes precedence over training knowledge. If web agents fail, the pipeline falls back to knowledge-only research (current behavior).
+Each agent combines training knowledge with web search: starting from what Claude knows, then verifying and enriching via web. Every data point is tagged as `knowledgeBased`, `webVerified`, or `webOnly`. Their outputs merge into `intelligence.json` — a unified brief that feeds all downstream phases. If web search is unavailable, all agents fall back to training knowledge only.
 
 ## File Schemas
 

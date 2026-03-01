@@ -59,22 +59,24 @@ If the need name is a role/tool/concept (e.g., "vibecoder"), interpret the under
 
 Launch 3 research agents **in parallel** using the Agent tool:
 
-1. **Knowledge Researcher** (`itropa:knowledge-researcher`) — Uses Claude's training data
+1. **Knowledge Researcher** (`itropa:knowledge-researcher`) — Training knowledge + web verification
    - Prompt: "Research the human need '{need}' for the ITROPA pipeline. Builder profile: {profile}. Follow the instructions in your agent file. Return your findings as a single JSON object."
    - Model: sonnet
-   - This agent mines prior art, historical patterns, biomimicry, and abstract transferable mechanisms
+   - Mines prior art, historical patterns, biomimicry, and abstract transferable mechanisms. Verifies and enriches findings via web search.
 
-2. **Market Researcher** (`itropa:market-researcher`) — Uses WebSearch + WebFetch
-   - Prompt: "Research the market landscape for the human need '{need}' using web search. Builder profile: {profile}. Follow the instructions in your agent file. Return your findings as a single JSON object."
+2. **Market Researcher** (`itropa:market-researcher`) — Training knowledge + web market data
+   - Prompt: "Research the market landscape for the human need '{need}' for the ITROPA pipeline. Builder profile: {profile}. Follow the instructions in your agent file. Return your findings as a single JSON object."
    - Model: sonnet
-   - This agent finds real companies, funding, pricing, market sizing, and competitive gaps
+   - Combines known market knowledge with web search for real companies, funding, pricing, market sizing, and competitive gaps.
 
-3. **Trend Researcher** (`itropa:trend-researcher`) — Uses WebSearch + WebFetch
-   - Prompt: "Research recent trends and launches related to the human need '{need}' using web search. Builder profile: {profile}. Follow the instructions in your agent file. Return your findings as a single JSON object."
+3. **Trend Researcher** (`itropa:trend-researcher`) — Training knowledge + web trend data
+   - Prompt: "Research recent trends and launches related to the human need '{need}' for the ITROPA pipeline. Builder profile: {profile}. Follow the instructions in your agent file. Return your findings as a single JSON object."
    - Model: sonnet
-   - This agent finds recent launches, technology trends, timing signals, and solo dev opportunities
+   - Combines known trend knowledge with web search for recent launches, technology shifts, timing signals, and solo dev opportunities.
 
-**Fallback:** If web-based agents fail (WebSearch unavailable, errors, empty results), proceed with knowledge-researcher output only. Note in the report: "Market data is from training knowledge — web search was unavailable."
+Each agent uses a two-pass approach: training knowledge first, then web search to verify and enrich. Every data point is tagged as `knowledgeBased`, `webVerified`, or `webOnly`.
+
+**Fallback:** If WebSearch is unavailable, all agents fall back to training knowledge only. All data points are tagged `knowledgeBased` and the report notes: "Web search was unavailable — all data from training knowledge."
 
 ### Phase 1: Consolidate Intelligence
 

@@ -92,7 +92,7 @@ Then just talk:
 
 | Phase | What happens |
 |-------|-------------|
-| Research Agents | 3 parallel agents: knowledge (training data), market (web search), trends (web search) |
+| Research Agents | 3 parallel agents, each combining training knowledge + web search: knowledge (prior art), market (companies/pricing), trends (launches/signals) |
 | Consolidate Intelligence | Merge agent outputs — web-verified data trumps training knowledge |
 | Industry Tree | 4-era evolution ending with 5 AI-era future industries (informed by real trends) |
 | Triage | Ranks by your profile, picks top 3 |

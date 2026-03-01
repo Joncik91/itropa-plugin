@@ -5,9 +5,9 @@
 ```
 itropa-plugin/
 ├── agents/                    # Research agent definitions
-│   ├── knowledge-researcher.md   # Training data mining (Read only)
-│   ├── market-researcher.md      # Web market research (WebSearch, WebFetch)
-│   └── trend-researcher.md       # Web trend research (WebSearch, WebFetch)
+│   ├── knowledge-researcher.md   # Prior art + patterns (training data + web search)
+│   ├── market-researcher.md      # Market landscape (training data + web search)
+│   └── trend-researcher.md       # Trends + launches (training data + web search)
 ├── commands/                  # User-invocable commands
 │   ├── constraints.md            # Builder profile management
 │   ├── go.md                     # Main research pipeline
@@ -53,9 +53,10 @@ color: green              # Terminal color for identification
 ### Tool Access
 
 - Research agents should use **read-only tools** — they gather data, not modify files
-- `knowledge-researcher`: `Read` only (mines training data)
-- `market-researcher`: `WebSearch`, `WebFetch` (web market data)
-- `trend-researcher`: `WebSearch`, `WebFetch` (web trend data)
+- All research agents combine training knowledge with web search
+- `knowledge-researcher`: `Read`, `WebSearch`, `WebFetch` (prior art + patterns, verified via web)
+- `market-researcher`: `WebSearch`, `WebFetch` (market landscape, training knowledge + web data)
+- `trend-researcher`: `WebSearch`, `WebFetch` (trends + launches, training knowledge + web data)
 
 ### Output Format
 

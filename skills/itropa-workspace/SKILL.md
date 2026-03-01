@@ -37,7 +37,7 @@ Ready to continue? Try /itropa:status or just tell me what you want to explore.
 | Command | Purpose |
 |---------|---------|
 | `/itropa:setup` | Initialize workspace (creates graph.json, installs MCP deps) |
-| `/itropa:go <need>` | Full autonomous pipeline: prior art → tree → triage → branch → mechanisms → deep-dive → concepts → cross-pollinate → digest → graph → report |
+| `/itropa:go <need>` | Full autonomous pipeline: research agents → consolidate intelligence → tree → triage → branch → mechanisms → deep-dive → concepts → cross-pollinate → digest → graph → report. Uses web search for real market data when available. |
 | `/itropa:status [search]` | Dashboard + search (uses MCP search if available) |
 | `/itropa:constraints` | Builder profile |
 
@@ -75,6 +75,7 @@ All analysis capabilities from the 7 skills are available conversationally. The 
     └── {need-slug}/
         ├── runs.json              # Run history for this need
         ├── {YYYY-MM-DD}/          # Timestamped run directory
+        │   ├── intelligence.json  # Consolidated research agent output (web + knowledge)
         │   ├── need.json          # Need + prior art + industry tree
         │   ├── mechanisms.json    # 5-framework analyses per industry
         │   ├── deep-dives.json    # Business analyses per industry
@@ -87,6 +88,18 @@ All analysis capabilities from the 7 skills are available conversationally. The 
 ```
 
 **Key difference from v1:** Data files are inside timestamped directories. Re-researching a need creates a new directory, preserving all previous data.
+
+## Research Agents
+
+The pipeline dispatches 3 parallel research agents at the start of each run:
+
+| Agent | Model | Tools | Purpose |
+|-------|-------|-------|---------|
+| `knowledge-researcher` | sonnet | Read | Prior art, historical patterns, biomimicry, abstract mechanisms from training data |
+| `market-researcher` | sonnet | WebSearch, WebFetch | Real companies, funding, pricing, market sizing, competitive gaps |
+| `trend-researcher` | sonnet | WebSearch, WebFetch | Recent launches, YC/ProductHunt, technology shifts, timing signals |
+
+Their outputs merge into `intelligence.json` — a unified brief that feeds all downstream phases. Web-verified data takes precedence over training knowledge. If web agents fail, the pipeline falls back to knowledge-only research (current behavior).
 
 ## File Schemas
 
@@ -173,7 +186,39 @@ All analysis capabilities from the 7 skills are available conversationally. The 
     "Trust-building mechanisms transfer across all status industries",
     "Weekend-buildable concepts exist in reputation verification",
     "B2B reputation tools have clearer monetization than B2C"
-  ]
+  ],
+  "dataSources": {
+    "knowledgeBased": 12,
+    "webVerified": 8,
+    "webOnly": 5
+  }
+}
+```
+
+### intelligence.json (per run — consolidated research agent output)
+```json
+{
+  "priorArt": {
+    "currentLeaders": [{ "name": "", "domain": "", "mechanism": "", "limitation": "", "source": "knowledgeBased|webVerified|webOnly" }],
+    "historical": [{ "name": "", "era": "", "mechanism": "", "lesson": "", "source": "knowledgeBased" }],
+    "adjacent": [{ "name": "", "originalDomain": "", "mechanism": "", "transferPotential": "", "source": "knowledgeBased" }],
+    "nature": [{ "name": "", "mechanism": "", "biomimicryPotential": "", "source": "knowledgeBased" }]
+  },
+  "marketData": {
+    "companies": [{ "name": "", "url": "", "funding": "", "pricing": "", "limitation": "", "source": "webVerified" }],
+    "marketSize": "",
+    "segments": [],
+    "pricingLandscape": { "freeOptions": [], "lowEnd": "", "midRange": "", "enterprise": "", "commonModels": [] },
+    "recentFunding": []
+  },
+  "trends": {
+    "hotNow": [],
+    "emerging": [],
+    "technologyEnablers": [],
+    "soloDevOpportunities": []
+  },
+  "patterns": [{ "name": "", "mechanism": "", "examples": [], "transferPotential": "" }],
+  "dataSources": { "knowledgeBased": 0, "webVerified": 0, "webOnly": 0 }
 }
 ```
 

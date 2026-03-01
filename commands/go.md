@@ -44,15 +44,82 @@ Set `RUN_DIR = research/{slug}/{date}` (or `{date}-N` if collision).
 
 Run these phases in sequence. Do NOT ask for user input between phases — make decisions autonomously.
 
-### Phase 1: Prior Art Research
+### Phase 0: Research Agent Dispatch
 
-Research existing solutions for this human need across 4 categories:
-- **Current Leaders**: 3-4 modern solutions — name, domain, mechanism, limitation
-- **Historical Precedents**: 3-4 historical solutions — name, era, mechanism, lesson
-- **Adjacent Domains**: 3-4 cross-domain solutions — name, original domain, mechanism, transfer potential
-- **Nature Solutions**: 3-4 biomimicry examples — natural example, mechanism, application potential
+Format a builder profile summary from `constraints.json`:
+```
+Builder: {experienceLevel} developer
+Stack: {techStack}
+Goal: {revenueGoal} ({targetMRR})
+Time: {availableTime} ({workStyle})
+Preferences: {preferredFormFactors}, B2B={preferB2B}, B2C={preferB2C}
+```
 
-If the need name is a role/tool/concept (e.g., "vibecoder"), interpret the underlying human need first.
+If the need name is a role/tool/concept (e.g., "vibecoder"), interpret the underlying human need first, and use the interpreted need for agent dispatch.
+
+Launch 3 research agents **in parallel** using the Agent tool:
+
+1. **Knowledge Researcher** (`itropa:knowledge-researcher`) — Uses Claude's training data
+   - Prompt: "Research the human need '{need}' for the ITROPA pipeline. Builder profile: {profile}. Follow the instructions in your agent file. Return your findings as a single JSON object."
+   - Model: sonnet
+   - This agent mines prior art, historical patterns, biomimicry, and abstract transferable mechanisms
+
+2. **Market Researcher** (`itropa:market-researcher`) — Uses WebSearch + WebFetch
+   - Prompt: "Research the market landscape for the human need '{need}' using web search. Builder profile: {profile}. Follow the instructions in your agent file. Return your findings as a single JSON object."
+   - Model: sonnet
+   - This agent finds real companies, funding, pricing, market sizing, and competitive gaps
+
+3. **Trend Researcher** (`itropa:trend-researcher`) — Uses WebSearch + WebFetch
+   - Prompt: "Research recent trends and launches related to the human need '{need}' using web search. Builder profile: {profile}. Follow the instructions in your agent file. Return your findings as a single JSON object."
+   - Model: sonnet
+   - This agent finds recent launches, technology trends, timing signals, and solo dev opportunities
+
+**Fallback:** If web-based agents fail (WebSearch unavailable, errors, empty results), proceed with knowledge-researcher output only. Note in the report: "Market data is from training knowledge — web search was unavailable."
+
+### Phase 1: Consolidate Intelligence
+
+Wait for all 3 agents to complete, then merge their outputs into a unified intelligence brief.
+
+**Merge rules:**
+- **Web-verified trumps training knowledge**: If the knowledge agent names a company and the market agent found real data for it, use the real data
+- **Add web-only discoveries**: Companies, launches, and trends found only via web search get added to the appropriate prior art categories
+- **Preserve knowledge-only insights**: Historical precedents, biomimicry, abstract patterns, and industry landscape from the knowledge agent are kept — these don't need web verification
+- **Tag every data point** with its source: `knowledgeBased`, `webVerified`, or `webOnly`
+
+**Build `intelligence.json`:**
+```json
+{
+  "priorArt": {
+    "currentLeaders": [...],
+    "historical": [...],
+    "adjacent": [...],
+    "nature": [...]
+  },
+  "marketData": {
+    "companies": [{ "name": "...", "url": "...", "funding": "...", "pricing": "...", "limitation": "...", "source": "webVerified" }],
+    "marketSize": "...",
+    "segments": [...],
+    "pricingLandscape": { "freeOptions": [], "lowEnd": "", "midRange": "", "enterprise": "", "commonModels": [] },
+    "recentFunding": [...]
+  },
+  "trends": {
+    "hotNow": [...],
+    "emerging": [...],
+    "technologyEnablers": [...],
+    "soloDevOpportunities": [...]
+  },
+  "patterns": [...],
+  "dataSources": {
+    "knowledgeBased": 0,
+    "webVerified": 0,
+    "webOnly": 0
+  }
+}
+```
+
+**Save** `{RUN_DIR}/intelligence.json`.
+
+**Build prior art structure** (same 4 categories as before, now enriched with real data where available) and include it in the need data for Phase 2.
 
 ### Phase 2: Industry Evolution Tree
 
@@ -64,10 +131,12 @@ Generate:
   - `id`: `{slug}-{n}` format
   - `type`: "future"
   - `name`: Creative, specific name
-  - `mutation`: Technology/trend/shift that enables it
+  - `mutation`: Technology/trend/shift that enables it — **reference real technology trends from intelligence.json where available**
   - `insight`: Why it emerges (connected to prior art)
   - `inspirations`: 1-3 items from prior art with `source`, `mechanism`, `twist`
   - `children`: `[]`
+
+**Use intelligence.json data:** Reference real technology enablers and emerging trends from `intelligence.json` when generating mutations. Solo dev opportunities identified by the trend researcher should inform the future industries.
 - `icon`: One of Users, Zap, Brain, Heart, Shield, Leaf, Sparkles
 - `description`: Brief core need description
 - `relatedNeeds`: 3 related needs
@@ -111,10 +180,12 @@ Each framework produces: `coreMechanism`, `abstractPattern`, framework-specific 
 
 For each top 3 industry, run business analysis using the business-analysis skill. Format the builder profile from `constraints.json` as context.
 
+**Use intelligence.json data:** Reference real competitor data, real pricing, and real market sizing from `intelligence.json` for each deep dive. The `keyPlayers` field should contain web-verified companies where available. Use actual pricing landscape data to inform monetization analysis. Competitive gaps identified by the market researcher should inform opportunity assessment.
+
 Produce:
-- Market opportunity (size, growth, trajectory)
+- Market opportunity (size, growth, trajectory) — **use real market sizing from intelligence.json**
 - Key enablers, challenges with solutions, timeline
-- First mover advantage, prior art leverage, key players, risks
+- First mover advantage, prior art leverage, key players (**web-verified where possible**), risks
 - **Opportunity Score** (5 metrics 0-100): marketTiming, technicalFit, effortEstimate, monetizationClarity, competitionDensity, overallScore
 - **Solo Dev Assessment**: feasibility, timeToMVP, techStack, biggestChallenge, unfairAdvantage
 - **Monetization Models**: 2-3 models with pricing and revenue ranges
@@ -179,7 +250,12 @@ After all data is saved, generate a compact `digest.json` (~1KB) in the run dire
     { "name": "...", "score": 80, "effort": "weekend" }
   ],
   "tags": ["reputation", "trust", "credibility"],
-  "keyInsights": ["Insight 1", "Insight 2", "Insight 3"]
+  "keyInsights": ["Insight 1", "Insight 2", "Insight 3"],
+  "dataSources": {
+    "knowledgeBased": 0,
+    "webVerified": 0,
+    "webOnly": 0
+  }
 }
 ```
 
@@ -190,6 +266,7 @@ After all data is saved, generate a compact `digest.json` (~1KB) in the run dire
 - `topConcepts` — from app-concepts.json, top 3 concepts by score with name/score/effortEstimate
 - `tags` — combine recurring themes from all data (aim for 5-10 tags)
 - `keyInsights` — 3-5 most important takeaways from the entire run
+- `dataSources` — copy from `intelligence.json` dataSources field (counts of knowledgeBased, webVerified, webOnly data points)
 
 **Save** to `{RUN_DIR}/digest.json`.
 
@@ -287,6 +364,8 @@ ITROPA Research Report: {Need Name}
 ════════════════════════════════════
 Run: {date} | Run #{N} for this need
 
+Data Sources: {knowledgeBased} knowledge-based | {webVerified} web-verified | {webOnly} web-only
+
 Prior Art Highlights:
   - {Top leader}: {mechanism} (but misses: {limitation})
   - {Best historical lesson}
@@ -356,6 +435,8 @@ What to do next:
 - Build verdicts are honest — not everything is "build"
 - The report should be actionable — the user should know what to do next
 - Digest should be compact (~1KB) — just enough for fast scanning
+- Market data should be web-verified where possible. Clearly note which data points are from web search vs training knowledge
+- When web search data is available, prefer it over training knowledge for companies, pricing, funding, and market sizing
 
 ## Error Handling
 
@@ -365,3 +446,5 @@ What to do next:
 - If same-day directory collision, append suffix (`-2`, `-3`, etc.)
 - If MCP reindex fails or MCP not available, skip gracefully
 - If `graph.json` doesn't exist, create it with empty connections
+- If web research agents fail (WebSearch unavailable or errors), proceed with knowledge-researcher output only and note it in the report
+- If web agents return empty results, still proceed — knowledge-only research is better than no research

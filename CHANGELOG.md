@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.1.1] - 2026-03-01
+
+### Added
+- **Research agents**: 3 parallel agents (`knowledge-researcher`, `market-researcher`, `trend-researcher`) run at pipeline start to ground research in real data
+- **Web-grounded research**: market and trend agents use WebSearch + WebFetch for real companies, funding, pricing, recent launches, and timing signals
+- **`intelligence.json`**: new per-run file consolidating web-verified and knowledge-based research data
+- **Data source tagging**: every data point tagged as `knowledgeBased`, `webVerified`, or `webOnly`
+- **`dataSources` field in digest**: counts of knowledge-based, web-verified, and web-only data points
+- `agents/` directory with agent definitions (YAML frontmatter + structured prompts)
+- `CONTRIBUTING.md` updated with agent conventions and project structure
+
+### Changed
+- `/itropa:go` pipeline restructured: new Phase 0 (Research Agent Dispatch) and Phase 1 (Consolidate Intelligence) replace old Phase 1 (Prior Art Research)
+- Phase 2 (Industry Tree) now references real technology trends from intelligence.json
+- Phase 6 (Deep Dive) uses real competitor data, pricing, and market sizing from intelligence.json
+- Phase 8.5 (Digest) includes `dataSources` counts
+- Phase 9 (Report) shows data source breakdown
+- Pipeline gracefully degrades to knowledge-only if WebSearch is unavailable
+
 ## [2.1.0] - 2026-02-28
 
 ### Fixed

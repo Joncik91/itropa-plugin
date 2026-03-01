@@ -39,17 +39,18 @@ This personalizes all scoring, build verdicts, and product concepts.
 
 That's it. Claude runs the full pipeline (takes a few minutes):
 
-1. **Prior art** — Researches existing solutions across 4 categories
-2. **Industry tree** — Generates 5 future industries with evolution context
-3. **Triage** — Picks the 3 most promising for your profile
-4. **Branch** — Expands the top pick into 3 sub-industries
-5. **Mechanisms** — Extracts transferable patterns using 5 analytical frameworks
-6. **Deep dive** — Business analysis with opportunity scores (0-100) and build/explore/skip verdicts
-7. **App concepts** — 5 product ideas for the best-scoring industry
-8. **Cross-pollination** — Combines top 2 industries using 5 strategies
-9. **Digest** — Generates a compact ~1KB summary for fast session resume
-10. **Graph + Run log** — Updates cross-need connections, logs run to history
-11. **Report** — Everything presented ranked and actionable
+1. **Research agents** — 3 parallel agents search the web for real market data, recent launches, and trends. Claude's training knowledge fills in historical context and biomimicry. Web search grounds the entire pipeline in verifiable data.
+2. **Consolidate intelligence** — Merges web-verified and knowledge-based data into a unified brief
+3. **Industry tree** — Generates 5 future industries with evolution context (informed by real trends)
+4. **Triage** — Picks the 3 most promising for your profile
+5. **Branch** — Expands the top pick into 3 sub-industries
+6. **Mechanisms** — Extracts transferable patterns using 5 analytical frameworks
+7. **Deep dive** — Business analysis with real competitor data, opportunity scores (0-100), and build/explore/skip verdicts
+8. **App concepts** — 5 product ideas for the best-scoring industry
+9. **Cross-pollination** — Combines top 2 industries using 5 strategies
+10. **Digest** — Generates a compact ~1KB summary with data source counts for fast session resume
+11. **Graph + Run log** — Updates cross-need connections, logs run to history
+12. **Report** — Everything presented ranked and actionable, with web-verified data clearly noted
 
 You get a report like:
 
@@ -138,6 +139,7 @@ research/
 └── {need-slug}/
     ├── runs.json              # Run history
     └── {YYYY-MM-DD}/          # Timestamped run
+        ├── intelligence.json  # Web + knowledge research data
         ├── need.json          # Prior art + industry tree
         ├── mechanisms.json    # 5-framework analyses
         ├── deep-dives.json    # Scores + verdicts

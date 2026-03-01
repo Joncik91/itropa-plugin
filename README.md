@@ -2,14 +2,15 @@
 
 **Name a human need. Go make coffee. Come back to a full research report with scored product ideas.**
 
-ITROPA is a Claude Code plugin that turns Claude into an autonomous innovation research engine. You say `/itropa:go Belonging` and Claude runs a 9-phase pipeline — prior art research, future industry discovery, mechanism extraction, business analysis, product concepts — all personalized to your builder profile. No configuration, no APIs, no prompting. Just results.
+ITROPA is a Claude Code plugin that turns Claude into an autonomous innovation research engine. You say `/itropa:go Belonging` and Claude runs a 12-phase pipeline — web-grounded research, future industry discovery, mechanism extraction, business analysis, product concepts — all personalized to your builder profile. No configuration, no APIs, no prompting. Just results.
 
 ```
 /itropa:go Status
 
  Starting full research pipeline on "Status"...
 
- Phase 1: Prior Art ✓ (16 solutions across 4 categories)
+ Phase 0: Research Agents ✓ (3 agents dispatched in parallel)
+ Phase 1: Intelligence ✓ (web + knowledge data consolidated)
  Phase 2: Industry Tree ✓ (5 future industries generated)
  Phase 3: Triage ✓ (Top 3 selected for your profile)
  Phase 4: Branch ✓ (#1 expanded into 3 sub-industries)
@@ -71,14 +72,15 @@ Then just talk:
 
 **Claude IS the engine.** No external APIs, no wrapper scripts, no token costs beyond your Claude subscription. The plugin encodes ITROPA's 5-framework analysis methodology as skills — Claude does all the thinking.
 
-**Fully autonomous.** You don't pick which industry to analyze or which framework to run. Claude triages, prioritizes, and chains 9 phases without asking. You review the output, not manage the process.
+**Fully autonomous.** You don't pick which industry to analyze or which framework to run. Claude triages, prioritizes, and chains 12 phases without asking. You review the output, not manage the process.
 
 **Personalized to you.** Describe yourself once — tech stack, goals, risk tolerance, available time. Every score, every verdict, every product concept is filtered through your profile.
 
 **Persistent across sessions.** Everything saves as JSON. Close Claude, come back next week, `/itropa:status` shows exactly where you left off. Digests (~1KB each) enable fast session resume.
 
-## v2.0 Features
+## v2.1.1 Features
 
+- **Web-grounded research** — 3 parallel research agents combine Claude's knowledge with real web search. Market data, companies, funding, and pricing come from actual web sources, not training memory. Falls back gracefully to knowledge-only if web search is unavailable.
 - **Timestamped runs** — Re-research a need without losing previous data. Each run gets its own dated directory.
 - **Research graph** — Shared mechanisms and themes across needs are tracked automatically.
 - **MCP search** — Full-text search across all research data using SQLite FTS5.
@@ -90,8 +92,9 @@ Then just talk:
 
 | Phase | What happens |
 |-------|-------------|
-| Prior Art | 16+ existing solutions across 4 categories (leaders, historical, adjacent, nature) |
-| Industry Tree | 4-era evolution ending with 5 AI-era future industries |
+| Research Agents | 3 parallel agents: knowledge (training data), market (web search), trends (web search) |
+| Consolidate Intelligence | Merge agent outputs — web-verified data trumps training knowledge |
+| Industry Tree | 4-era evolution ending with 5 AI-era future industries (informed by real trends) |
 | Triage | Ranks by your profile, picks top 3 |
 | Branch | Expands #1 into 3 specialized sub-industries |
 | Mechanisms | 5 frameworks x 3 industries (Functional, Structural, Causal, Constraint-Opportunity, Scale-Context) |
@@ -126,6 +129,7 @@ research/
 └── belonging/
     ├── runs.json              # Run history
     └── 2026-02-28/            # Timestamped run
+        ├── intelligence.json  # Web + knowledge research data
         ├── need.json          # Prior art + industry tree
         ├── mechanisms.json    # 5-framework analyses
         ├── deep-dives.json    # Scores + verdicts

@@ -1,7 +1,7 @@
 ---
 name: trend-researcher
 model: sonnet
-tools: WebSearch, WebFetch
+tools: Read, WebSearch, WebFetch
 color: magenta
 ---
 

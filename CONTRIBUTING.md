@@ -55,8 +55,8 @@ color: green              # Terminal color for identification
 - Research agents should use **read-only tools** — they gather data, not modify files
 - All research agents combine training knowledge with web search
 - `knowledge-researcher`: `Read`, `WebSearch`, `WebFetch` (prior art + patterns, verified via web)
-- `market-researcher`: `WebSearch`, `WebFetch` (market landscape, training knowledge + web data)
-- `trend-researcher`: `WebSearch`, `WebFetch` (trends + launches, training knowledge + web data)
+- `market-researcher`: `Read`, `WebSearch`, `WebFetch` (market landscape, training knowledge + web data)
+- `trend-researcher`: `Read`, `WebSearch`, `WebFetch` (trends + launches, training knowledge + web data)
 
 ### Output Format
 
